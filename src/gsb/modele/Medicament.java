@@ -24,6 +24,14 @@ public class Medicament {
         this.famCode = famCode;
         this.famLibelle = famLibelle;
     }
+    public Medicament(String medDepotLegal, String medNomCommercial, String medComposition, String medEffets, 
+            String medContreIndic) {
+		this.medDepotLegal = medDepotLegal;
+		this.medNomCommercial = medNomCommercial;
+		this.medComposition = medComposition;
+		this.medEffets = medEffets;
+		this.medContreIndic = medContreIndic;
+		}
 
 	public String getMedDepotLegal() {
 		return medDepotLegal;

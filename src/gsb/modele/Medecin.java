@@ -43,6 +43,7 @@ public class Medecin {
 		this.potentiel = potentiel;
 		this.specialite = specialite;
 	}
+	
 	/**
 	 * @return Renvoie codeMed.
 	 */
