@@ -4,6 +4,7 @@ import gsb.modele.Visiteur;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class VisiteurDao {
@@ -74,4 +75,19 @@ public class VisiteurDao {
 
         return lesVisiteurs;
     }
+    public static List<String> getAllMatricules() {
+        List<String> matricules = new ArrayList<>();
+        try {
+            String requete = "SELECT MATRICULE FROM VISITEUR";
+            ResultSet resultSet = ConnexionMySql.execReqSelection(requete);
+            while (resultSet.next()) {
+                matricules.add(resultSet.getString("MATRICULE"));
+            }
+            resultSet.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return matricules;
+    }
+
 }

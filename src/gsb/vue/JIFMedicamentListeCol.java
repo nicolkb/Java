@@ -3,18 +3,13 @@ package gsb.vue;
 import gsb.modele.Medicament;
 import gsb.modele.dao.MedicamentDao;
 
-import java.awt.Container;
-import java.awt.Dimension;
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import javax.swing.JButton;
-import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
 
 public class JIFMedicamentListeCol extends JInternalFrame implements ActionListener {
 
@@ -27,18 +22,18 @@ public class JIFMedicamentListeCol extends JInternalFrame implements ActionListe
     protected JTextField JTcodeMedicament;
     protected JButton JBafficherFiche;
     protected MenuPrincipal fenetreContainer;
+    private JTable table;
 
     public JIFMedicamentListeCol(MenuPrincipal uneFenetreContainer) {
         fenetreContainer = uneFenetreContainer;
         lesMedicaments = MedicamentDao.retournerCollectionDesMedicaments();
         int nbLignes = lesMedicaments.size();
 
-        JTable table;
         p = new JPanel(); 
 
         int i = 0;
         String[][] data = new String[nbLignes][3]; // Changez le nombre de colonnes selon vos besoins
-        for(Medicament unMedicament : lesMedicaments){
+        for (Medicament unMedicament : lesMedicaments) {
             data[i][0] = unMedicament.getMedDepotLegal();
             data[i][1] = unMedicament.getMedNomCommercial();
             data[i][2] = unMedicament.getFamLibelle(); // Ajoutez d'autres attributs si nécessaire
@@ -47,6 +42,21 @@ public class JIFMedicamentListeCol extends JInternalFrame implements ActionListe
         String[] columnNames = {"Code", "Nom", "Famille"};
         table = new JTable(data, columnNames);
         
+        // Ajout d'un listener pour détecter les sélections de lignes
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent event) {
+                if (!event.getValueIsAdjusting()) { // S'assure que le listener n'est pas déclenché en double
+                    int selectedRow = table.getSelectedRow();
+                    if (selectedRow != -1) {
+                        // Récupère le code du médicament sélectionné et le place dans JTcodeMedicament
+                        String selectedCode = (String) table.getValueAt(selectedRow, 0);
+                        JTcodeMedicament.setText(selectedCode);
+                    }
+                }
+            }
+        });
+
         scrollPane = new JScrollPane(table);
         scrollPane.setPreferredSize(new Dimension(400, 200));
         p.add(scrollPane);
@@ -61,6 +71,7 @@ public class JIFMedicamentListeCol extends JInternalFrame implements ActionListe
         pSaisie.add(JTcodeMedicament);
         pSaisie.add(JBafficherFiche);
         p.add(pSaisie);
+
         Container contentPane = getContentPane();
         contentPane.add(p);
     }
@@ -76,3 +87,4 @@ public class JIFMedicamentListeCol extends JInternalFrame implements ActionListe
         }   
     }
 }
+

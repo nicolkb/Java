@@ -92,12 +92,15 @@ public class MenuPrincipal extends JFrame implements ActionListener {
 		mVisiteurs.add(mV4);
 
 		mVisites = new JMenu("Visites");
-		JMenuItem mA1 = new JMenuItem("Consultation Visite");
-		mE1.addActionListener(this); // installation d'un ecouteur d'action
+		JMenuItem mA1 = new JMenuItem("Liste des Visites");
+		mA1.addActionListener(this);
 		mVisites.add(mA1);
 		JMenuItem mA2 = new JMenuItem("Ajout Visite");
 		mA2.addActionListener(this);
 		mVisites.add(mA2);
+		JMenuItem mA3= new JMenuItem("Modifier une Visite");
+		mA3.addActionListener(this);
+		mVisites.add(mA3);
 
 		mbar.add(mMedecins);
 		mbar.add(mMedicaments);
@@ -110,7 +113,6 @@ public class MenuPrincipal extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent evt) {
-		// TODO Raccord de methode auto-genere
 		if (evt.getSource() instanceof JMenuItem) {
 			String ChoixOption = evt.getActionCommand();
 
@@ -135,6 +137,21 @@ public class MenuPrincipal extends JFrame implements ActionListener {
 			}
 			else if (ChoixOption.equals("Ajout Visiteurs")) {
 				ouvrirFenetre(new JIFVisiteurAjout(this));
+			}
+			else if (ChoixOption.equals("Consultation Stock d'échantillons des Visiteurs")) {
+				ouvrirFenetre(new JIFStockVisiteur(this));
+			}
+			else if (ChoixOption.equals("Ajout d'échantillons pour un Visiteur")) {
+				ouvrirFenetre(new JIFStockAjout(this));
+			}
+			else if (ChoixOption.equals("Liste des Visites")) {
+				ouvrirFenetre(new JIFVisiteListe(this));
+			}
+			else if (ChoixOption.equals("Ajout Visite")) {
+				ouvrirFenetre(new JIFVisiteAjout(this));
+			}
+			else if (ChoixOption.equals("Modifier une Visite")) {
+				ouvrirFenetre(new JIFVisiteModif(this));
 			}
 
 		}

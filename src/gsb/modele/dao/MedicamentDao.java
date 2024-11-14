@@ -139,5 +139,19 @@ public class MedicamentDao {
 
         return medicaments;
     }
+    public static List<String> getAllDepotLegals() {
+        List<String> depotLegals = new ArrayList<>();
+        try {
+            String requete = "SELECT MED_DEPOTLEGAL FROM MEDICAMENT";
+            ResultSet resultSet = ConnexionMySql.execReqSelection(requete);
+            while (resultSet.next()) {
+                depotLegals.add(resultSet.getString("MED_DEPOTLEGAL"));
+            }
+            resultSet.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return depotLegals;
+    }
 }
 

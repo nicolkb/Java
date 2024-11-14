@@ -36,6 +36,9 @@ public class JIFMedicamentConsFamille extends JInternalFrame implements ActionLi
         panelPrincipal = new JPanel();
         
         List<String> familles = MedicamentDao.retournerToutesLesFamilles();
+        if (familles == null || familles.isEmpty()) {
+            familles = List.of("Aucune famille disponible");
+        }
         comboFamille = new JComboBox<>(familles.toArray(new String[0]));
         
         // Bouton de recherche
@@ -49,12 +52,10 @@ public class JIFMedicamentConsFamille extends JInternalFrame implements ActionLi
         // Initialisation du tableau (vide au départ)
         String[][] data = {};
         String[] columnNames = {"Dépôt Légal", "Nom Commercial", "Composition", "Effets", "Contre-indications"};
-        table = new JTable(new DefaultTableModel(data, columnNames));  // Utiliser DefaultTableModel pour une mise à jour facile
+        table = new JTable(new DefaultTableModel(data, columnNames));
         scrollPane = new JScrollPane(table);
         scrollPane.setPreferredSize(new Dimension(500, 200));
         panelPrincipal.add(scrollPane);
-
-
 
         // Mise en forme de la fenêtre
         Container contentPane = getContentPane();
@@ -69,14 +70,23 @@ public class JIFMedicamentConsFamille extends JInternalFrame implements ActionLi
     public void actionPerformed(ActionEvent arg0) {
         Object source = arg0.getSource();
         if (source == boutonRechercher) {
-            // Récupérer l'élément sélectionné (qui est sous la forme "FAM_CODE - FAM_LIBELLE")
             String selectedFamille = (String) comboFamille.getSelectedItem();
             
-            // Extraire uniquement le code de la famille (avant le " - ")
+            // Vérification de la sélection de famille
+            if (selectedFamille == null || !selectedFamille.contains(" - ")) {
+                System.out.println("Erreur : Famille non sélectionnée ou format incorrect.");
+                return;
+            }
+            
+            // Extraire uniquement le code de la famille
             String famCode = selectedFamille.split(" - ")[0];
             
             // Appeler la méthode DAO pour récupérer les médicaments par famille
             List<Medicament> medicaments = MedicamentDao.rechercherParFamille(famCode);
+            if (medicaments == null) {
+                System.out.println("Erreur : Aucun médicament trouvé pour cette famille.");
+                return;
+            }
 
             // Mettre à jour les données du tableau
             String[][] data = new String[medicaments.size()][5];

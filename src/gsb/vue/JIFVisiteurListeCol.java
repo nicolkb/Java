@@ -15,6 +15,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 public class JIFVisiteurListeCol extends JInternalFrame implements ActionListener {
 
@@ -27,40 +29,60 @@ public class JIFVisiteurListeCol extends JInternalFrame implements ActionListene
     protected JTextField JTcodeVisiteur;
     protected JButton JBafficherFiche;
     protected MenuPrincipal fenetreContainer;
+    private JTable table;
 
     public JIFVisiteurListeCol(MenuPrincipal uneFenetreContainer) {
         fenetreContainer = uneFenetreContainer;
         lesVisiteurs = VisiteurDao.retournerCollectionDesVisiteurs(); // Assurez-vous que cette méthode existe
         int nbLignes = lesVisiteurs.size();
 
-        JTable table;
-        p = new JPanel(); 
+        p = new JPanel();
 
-        int i = 0;
-        String[][] data = new String[nbLignes][3]; // Changez le nombre de colonnes selon vos besoins
-        for (Visiteur unVisiteur : lesVisiteurs) {
-            data[i][0] = unVisiteur.getMatricule(); // Ajustez cela selon les attributs de Visiteur
-            data[i][1] = unVisiteur.getNom(); // Ajustez cela
-            data[i][2] = unVisiteur.getPrenom(); // Ajustez cela
-            i++;
+        // Préparer les données pour le tableau
+        String[][] data = new String[nbLignes][3];
+        for (int i = 0; i < nbLignes; i++) {
+            Visiteur unVisiteur = lesVisiteurs.get(i);
+            data[i][0] = unVisiteur.getMatricule();
+            data[i][1] = unVisiteur.getNom();
+            data[i][2] = unVisiteur.getPrenom();
         }
-        String[] columnNames = {"Code", "Nom", "Prénom"}; // Modifiez selon vos colonnes
-        table = new JTable(data, columnNames);
+        String[] columnNames = {"Code", "Nom", "Prénom"};
         
+        // Création du tableau
+        table = new JTable(data, columnNames);
         scrollPane = new JScrollPane(table);
         scrollPane.setPreferredSize(new Dimension(400, 200));
         p.add(scrollPane);
-        
+
+        // Ajout d'un listener pour détecter les sélections de lignes
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent event) {
+                if (!event.getValueIsAdjusting()) { // S'assure que le listener n'est pas déclenché en double
+                    int selectedRow = table.getSelectedRow();
+                    if (selectedRow != -1) {
+                        // Récupère le matricule du visiteur sélectionné et le place dans JTcodeVisiteur
+                        String selectedMatricule = (String) table.getValueAt(selectedRow, 0);
+                        JTcodeVisiteur.setText(selectedMatricule);
+                    }
+                }
+            }
+        });
+
+        // Configuration du panneau de saisie
         pSaisie = new JPanel();
         JLabel labelCode = new JLabel("Code");
         JTcodeVisiteur = new JTextField(20);
         JTcodeVisiteur.setMaximumSize(JTcodeVisiteur.getPreferredSize());
         JBafficherFiche = new JButton("Fiche visiteur détaillée");
         JBafficherFiche.addActionListener(this);
+
         pSaisie.add(labelCode);
         pSaisie.add(JTcodeVisiteur);
         pSaisie.add(JBafficherFiche);
         p.add(pSaisie);
+
+        // Ajouter le panneau principal au contentPane
         Container contentPane = getContentPane();
         contentPane.add(p);
     }
@@ -76,3 +98,4 @@ public class JIFVisiteurListeCol extends JInternalFrame implements ActionListene
         }   
     }
 }
+
