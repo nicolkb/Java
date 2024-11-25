@@ -3,16 +3,20 @@ package gsb.vue;
 import javax.swing.*;
 import gsb.modele.Visite;
 import gsb.modele.dao.VisiteDao;
+import gsb.modele.dao.VisiteurDao;
+import gsb.modele.dao.MedecinDao;
+import gsb.modele.dao.MedicamentDao;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 public class JIFVisiteAjout extends JInternalFrame {
-	private static final long serialVersionUID = 1L;
-	private JTextField txtReference;
-    private JTextField txtMatricule;
-    private JTextField txtCodeMed;
+    private static final long serialVersionUID = 1L;
+    private JTextField txtReference;
+    private JComboBox<String> cbMatricule;  // Menu déroulant pour les matricules
+    private JComboBox<String> cbCodeMed;    // Menu déroulant pour les codes médecins
     private JTextField txtDateVisite;
     private JTextArea txtCommentaire;
     private JButton btnAjouter;
@@ -30,24 +34,28 @@ public class JIFVisiteAjout extends JInternalFrame {
         txtReference = new JTextField();
         panelChamps.add(txtReference);
 
-        // Champ Matricule du Visiteur
-        panelChamps.add(new JLabel("Matricule du Medecin:"));
-        txtMatricule = new JTextField();
-        panelChamps.add(txtMatricule);
+        // Champ Matricule du Visiteur (menu déroulant)
+        panelChamps.add(new JLabel("Matricule du Visiteur:"));
+        cbMatricule = new JComboBox<>();
+        remplirComboBoxMatricules();
+        panelChamps.add(cbMatricule);
 
-        // Champ Code Médicament
+        // Champ Code Médecin (menu déroulant)
         panelChamps.add(new JLabel("Code Médecin:"));
-        txtCodeMed = new JTextField();
-        panelChamps.add(txtCodeMed);
+        cbCodeMed = new JComboBox<>();
+        remplirComboBoxCodesMed();
+        panelChamps.add(cbCodeMed);
 
         // Champ Date de Visite
-        panelChamps.add(new JLabel("Date de Visite (DD-MM-YYYY):"));
+        panelChamps.add(new JLabel("Date de Visite (YYYY-MM-DD):"));
         txtDateVisite = new JTextField();
         panelChamps.add(txtDateVisite);
 
         // Champ Commentaire
         panelChamps.add(new JLabel("Commentaire:"));
         txtCommentaire = new JTextArea(3, 20);
+        txtCommentaire.setEditable(false);
+
         JScrollPane scrollPaneCommentaire = new JScrollPane(txtCommentaire);
         panelChamps.add(scrollPaneCommentaire);
 
@@ -70,15 +78,31 @@ public class JIFVisiteAjout extends JInternalFrame {
         setVisible(true);
     }
 
+    // Remplit le JComboBox des matricules des visiteurs
+    private void remplirComboBoxMatricules() {
+        List<String> matricules = VisiteurDao.getAllMatricules();
+        for (String matricule : matricules) {
+            cbMatricule.addItem(matricule);
+        }
+    }
+
+    // Remplit le JComboBox des codes médecins
+    private void remplirComboBoxCodesMed() {
+        List<String> codesMed = MedecinDao.getAllCode();
+        for (String codeMed : codesMed) {
+            cbCodeMed.addItem(codeMed);
+        }
+    }
+
     private void ajouterVisite() {
         String reference = txtReference.getText();
-        String matricule = txtMatricule.getText();
-        String codemed = txtCodeMed.getText();
+        String matricule = (String) cbMatricule.getSelectedItem();
+        String codemed = (String) cbCodeMed.getSelectedItem();
         String dateVisite = txtDateVisite.getText();
         String commentaire = txtCommentaire.getText();
 
         // Validation des champs
-        if (reference.isEmpty() || matricule.isEmpty() || codemed.isEmpty() || dateVisite.isEmpty()) {
+        if (reference.isEmpty() || matricule == null || codemed == null || dateVisite.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Veuillez remplir tous les champs obligatoires.", "Erreur", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -92,8 +116,8 @@ public class JIFVisiteAjout extends JInternalFrame {
             JOptionPane.showMessageDialog(this, "Visite ajoutée avec succès!");
             // Optionnel : vider les champs après l'ajout
             txtReference.setText("");
-            txtMatricule.setText("");
-            txtCodeMed.setText("");
+            cbMatricule.setSelectedIndex(-1);
+            cbCodeMed.setSelectedIndex(-1);
             txtDateVisite.setText("");
             txtCommentaire.setText("");
         } else {
@@ -101,3 +125,4 @@ public class JIFVisiteAjout extends JInternalFrame {
         }
     }
 }
+

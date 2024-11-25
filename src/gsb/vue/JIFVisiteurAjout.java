@@ -1,13 +1,13 @@
 package gsb.vue;
 
-import gsb.modele.Visiteur;
+import gsb.modele.dao.LocaliteDao;
 import gsb.service.VisiteurService;
-import gsb.utils.ValidationUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 public class JIFVisiteurAjout extends JInternalFrame implements ActionListener {
 
@@ -15,8 +15,9 @@ public class JIFVisiteurAjout extends JInternalFrame implements ActionListener {
 
     private JPanel pFormulaire;
     private JLabel JLmatricule, JLnom, JLprenom, JLlogin, JLmotDePasse, JLadresse, JLcodePostal, JLdateEntree, JLcodeUnit, JLnomUnit;
-    private JTextField JTmatricule, JTnom, JTprenom, JTlogin, JTadresse, JTcodePostal, JTdateEntree, JTcodeUnit, JTnomUnit;
+    private JTextField JTmatricule, JTnom, JTprenom, JTlogin, JTadresse, JTdateEntree, JTcodeUnit, JTnomUnit;
     private JPasswordField JTmotDePasse;
+    private JComboBox<String> JCBcodePostal; // Menu déroulant pour les codes postaux
     private JButton JBajouter, JBannuler;
 
     public JIFVisiteurAjout(MenuPrincipal uneFenetreContainer) {
@@ -33,7 +34,7 @@ public class JIFVisiteurAjout extends JInternalFrame implements ActionListener {
         JLmotDePasse = new JLabel("Mot de passe :");
         JLadresse = new JLabel("Adresse :");
         JLcodePostal = new JLabel("Code Postal :");
-        JLdateEntree = new JLabel("Date d'entrée (jj-mm-aaaa) :");
+        JLdateEntree = new JLabel("Date d'entrée (YYYY-MM-DD) :");
         JLcodeUnit = new JLabel("Code Unité :");
         JLnomUnit = new JLabel("Nom Unité :");
 
@@ -43,10 +44,13 @@ public class JIFVisiteurAjout extends JInternalFrame implements ActionListener {
         JTlogin = new JTextField(20);
         JTmotDePasse = new JPasswordField(20);
         JTadresse = new JTextField(20);
-        JTcodePostal = new JTextField(20);
         JTdateEntree = new JTextField(20);
         JTcodeUnit = new JTextField(20);
         JTnomUnit = new JTextField(20);
+
+        // Menu déroulant pour les codes postaux
+        JCBcodePostal = new JComboBox<>();
+        remplirComboBoxCodePostaux();
 
         // Ajout des composants au panneau
         pFormulaire.add(JLmatricule);
@@ -62,7 +66,7 @@ public class JIFVisiteurAjout extends JInternalFrame implements ActionListener {
         pFormulaire.add(JLadresse);
         pFormulaire.add(JTadresse);
         pFormulaire.add(JLcodePostal);
-        pFormulaire.add(JTcodePostal);
+        pFormulaire.add(JCBcodePostal); // Ajout du menu déroulant
         pFormulaire.add(JLdateEntree);
         pFormulaire.add(JTdateEntree);
         pFormulaire.add(JLcodeUnit);
@@ -84,6 +88,13 @@ public class JIFVisiteurAjout extends JInternalFrame implements ActionListener {
         pack();
     }
 
+    private void remplirComboBoxCodePostaux() {
+        List<String> codesPostaux = LocaliteDao.getAllCodePostaux();
+        for (String codePostal : codesPostaux) {
+            JCBcodePostal.addItem(codePostal);
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource() == JBajouter) {
@@ -93,7 +104,7 @@ public class JIFVisiteurAjout extends JInternalFrame implements ActionListener {
             String login = JTlogin.getText();
             String motDePasse = new String(JTmotDePasse.getPassword());
             String adresse = JTadresse.getText();
-            String codePostal = JTcodePostal.getText();
+            String codePostal = (String) JCBcodePostal.getSelectedItem(); // Récupération depuis le menu déroulant
             String dateEntree = JTdateEntree.getText();
             String codeUnit = JTcodeUnit.getText();
             String nomUnit = JTnomUnit.getText();
@@ -117,7 +128,7 @@ public class JIFVisiteurAjout extends JInternalFrame implements ActionListener {
         JTlogin.setText("");
         JTmotDePasse.setText("");
         JTadresse.setText("");
-        JTcodePostal.setText("");
+        JCBcodePostal.setSelectedIndex(-1); // Réinitialiser le menu déroulant
         JTdateEntree.setText("");
         JTcodeUnit.setText("");
         JTnomUnit.setText("");

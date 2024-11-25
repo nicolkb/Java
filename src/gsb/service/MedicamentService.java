@@ -7,7 +7,7 @@ public class MedicamentService {
             String effets, String contreIndications, float prixEchantillon, 
             String famCode, String famLibelle) {
         try {
-            if (depotLegal == null || depotLegal.isEmpty()) {
+            if (depotLegal.length() >= 10 || depotLegal == null || depotLegal.isEmpty()) {
                 return "Donnée obligatoire : dépôt légal";
             }
             if (famCode == null || famCode.length() != 3) {

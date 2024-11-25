@@ -1,7 +1,9 @@
 package gsb.vue;
 
+import gsb.modele.Stock;
 import gsb.modele.Visite;
 import gsb.modele.dao.VisiteDao;
+import gsb.modele.dao.StockDao;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,8 +17,8 @@ public class JIFVisiteModif extends JInternalFrame implements ActionListener {
 
     private JPanel pFormulaire;
     private JLabel JLreference, JLdateVisite, JLmatricule, JLcodeMed, JLcommentaire, JLmed1, JLquantiteMed1, JLmed2, JLquantiteMed2;
-    private JComboBox<String> JCBreference;
-    private JTextField JTdateVisite, JTmatricule, JTcodeMed, JTcommentaire, JTmed1, JTquantiteMed1, JTmed2, JTquantiteMed2;
+    private JComboBox<String> JCBreference, JCBmed1, JCBmed2;
+    private JTextField JTdateVisite, JTmatricule, JTcodeMed, JTcommentaire, JTquantiteMed1, JTquantiteMed2;
     private JButton JBmodifier, JBannuler;
 
     public JIFVisiteModif(MenuPrincipal uneFenetreContainer) {
@@ -24,7 +26,7 @@ public class JIFVisiteModif extends JInternalFrame implements ActionListener {
 
         // Panneau principal contenant les sous-panneaux
         pFormulaire = new JPanel();
-        pFormulaire.setLayout(new BoxLayout(pFormulaire, BoxLayout.Y_AXIS));  // Layout en colonne pour chaque ligne
+        pFormulaire.setLayout(new BoxLayout(pFormulaire, BoxLayout.Y_AXIS));
 
         // Création des composants
         JLreference = new JLabel("Référence :");
@@ -48,13 +50,17 @@ public class JIFVisiteModif extends JInternalFrame implements ActionListener {
         JTcommentaire = new JTextField(20);
 
         JLmed1 = new JLabel("Médicament 1 (Dépôt légal) :");
-        JTmed1 = new JTextField(20);
+        JCBmed1 = new JComboBox<>();
+        JCBmed1.addItem("Aucun"); // Option par défaut
+        JCBmed1.addActionListener(e -> chargerMedicamentsDansMenu(JCBmed1));
 
         JLquantiteMed1 = new JLabel("Quantité offerte 1 :");
         JTquantiteMed1 = new JTextField(20);
 
         JLmed2 = new JLabel("Médicament 2 (Dépôt légal) :");
-        JTmed2 = new JTextField(20);
+        JCBmed2 = new JComboBox<>();
+        JCBmed2.addItem("Aucun"); // Option par défaut
+        JCBmed2.addActionListener(e -> chargerMedicamentsDansMenu(JCBmed2));
 
         JLquantiteMed2 = new JLabel("Quantité offerte 2 :");
         JTquantiteMed2 = new JTextField(20);
@@ -65,9 +71,9 @@ public class JIFVisiteModif extends JInternalFrame implements ActionListener {
         pFormulaire.add(creerLignePanel(JLmatricule, JTmatricule));
         pFormulaire.add(creerLignePanel(JLcodeMed, JTcodeMed));
         pFormulaire.add(creerLignePanel(JLcommentaire, JTcommentaire));
-        pFormulaire.add(creerLignePanel(JLmed1, JTmed1));
+        pFormulaire.add(creerLignePanel(JLmed1, JCBmed1));
         pFormulaire.add(creerLignePanel(JLquantiteMed1, JTquantiteMed1));
-        pFormulaire.add(creerLignePanel(JLmed2, JTmed2));
+        pFormulaire.add(creerLignePanel(JLmed2, JCBmed2));
         pFormulaire.add(creerLignePanel(JLquantiteMed2, JTquantiteMed2));
 
         // Boutons Modifier et Annuler dans un panel distinct
@@ -87,7 +93,6 @@ public class JIFVisiteModif extends JInternalFrame implements ActionListener {
         pack();
     }
 
-    // Méthode utilitaire pour créer une ligne avec un label et un champ
     private JPanel creerLignePanel(JLabel label, JComponent champ) {
         JPanel ligne = new JPanel(new FlowLayout(FlowLayout.LEFT));
         ligne.add(label);
@@ -96,7 +101,6 @@ public class JIFVisiteModif extends JInternalFrame implements ActionListener {
     }
 
     private void chargerReferences() {
-        // Charger les références des visites dans le menu déroulant
         List<Visite> visites = VisiteDao.getAllVisites();
         for (Visite visite : visites) {
             JCBreference.addItem(visite.getReference());
@@ -106,47 +110,93 @@ public class JIFVisiteModif extends JInternalFrame implements ActionListener {
     private void afficherDetailsVisite(String reference) {
         Visite visite = VisiteDao.getVisiteByReference(reference);
         if (visite != null) {
-
             JTdateVisite.setText(visite.getDateVisite());
             JTmatricule.setText(visite.getMatricule());
             JTcodeMed.setText(visite.getCodeMed());
             JTcommentaire.setText(visite.getCommentaire());
-            JTmed1.setText(visite.getMedOffert1());
-            JTquantiteMed1.setText(String.valueOf(visite.getQuantiteMed1()));
-            JTmed2.setText(visite.getMedOffert2());
-            JTquantiteMed2.setText(String.valueOf(visite.getQuantiteMed2()));
+        }
+
+        JCBmed1.removeAllItems();
+        JCBmed1.addItem("Aucun");
+        JCBmed2.removeAllItems();
+        JCBmed2.addItem("Aucun");
+    }
+
+    private void chargerMedicamentsDansMenu(JComboBox<String> comboBox) {
+        if (comboBox.getItemCount() > 1) {
+            return; // Évite de recharger si déjà chargé
+        }
+
+        List<Stock> stocks = StockDao.getStockByVisiteur(JTmatricule.getText());
+        for (Stock stock : stocks) {
+            comboBox.addItem(stock.getMedDepotLegal());
         }
     }
 
-    @Override
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource() == JBmodifier) {
-            // Récupérer les données des champs pour la mise à jour
-            String reference = (String) JCBreference.getSelectedItem();
-            String commentaire = JTcommentaire.getText();
-            String medOffert1 = JTmed1.getText();
-            int quantiteMed1 = Integer.parseInt(JTquantiteMed1.getText());
-            String medOffert2 = JTmed2.getText();
-            int quantiteMed2 = Integer.parseInt(JTquantiteMed2.getText());
+            try {
+                String reference = (String) JCBreference.getSelectedItem();
 
-            // Créer un objet Visite pour la mise à jour
-            Visite visite = new Visite(reference, null, null, null, commentaire, medOffert1, quantiteMed1, medOffert2, quantiteMed2);
+                if (reference == null || reference.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Veuillez sélectionner une référence de visite.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
 
-            // Appel du service de mise à jour
-            int result = VisiteDao.mettreAJourVisite(visite);
-            if (result > 0) {
-                JOptionPane.showMessageDialog(this, "Visite mise à jour avec succès");
+                String commentaire = JTcommentaire.getText();
+                String medOffert1 = "Aucun".equals(JCBmed1.getSelectedItem()) ? null : (String) JCBmed1.getSelectedItem();
+                String medOffert2 = "Aucun".equals(JCBmed2.getSelectedItem()) ? null : (String) JCBmed2.getSelectedItem();
+
+                Integer quantiteMed1 = JTquantiteMed1.getText().isEmpty() ? 0 : Integer.parseInt(JTquantiteMed1.getText());
+                Integer quantiteMed2 = JTquantiteMed2.getText().isEmpty() ? 0 : Integer.parseInt(JTquantiteMed2.getText());
+
+                if (commentaire != null && !commentaire.isEmpty()) {
+                    VisiteDao.mettreAJourCommentaire(reference, commentaire);
+                }
+
+                if (medOffert1 != null && quantiteMed1 > 0) {
+                    if (!mettreAJourStock(JTmatricule.getText(), medOffert1, quantiteMed1)) {
+                        JOptionPane.showMessageDialog(this, "Stock insuffisant pour le médicament 1.", "Erreur de stock", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    VisiteDao.mettreAJourMedOffert1(reference, medOffert1, quantiteMed1);
+                }
+
+                if (medOffert2 != null && quantiteMed2 > 0) {
+                    if (!mettreAJourStock(JTmatricule.getText(), medOffert2, quantiteMed2)) {
+                        JOptionPane.showMessageDialog(this, "Stock insuffisant pour le médicament 2.", "Erreur de stock", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    VisiteDao.mettreAJourMedOffert2(reference, medOffert2, quantiteMed2);
+                }
+
+                JOptionPane.showMessageDialog(this, "Visite mise à jour avec succès.");
                 viderChamps();
-            } else {
-                JOptionPane.showMessageDialog(this, "Erreur lors de la mise à jour de la visite", "Erreur", JOptionPane.ERROR_MESSAGE);
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Veuillez entrer un nombre valide pour les quantités.", "Erreur", JOptionPane.ERROR_MESSAGE);
             }
         } else if (evt.getSource() == JBannuler) {
             viderChamps();
         } else if (evt.getSource() == JCBreference) {
-            // Afficher les détails de la visite sélectionnée
             String reference = (String) JCBreference.getSelectedItem();
             afficherDetailsVisite(reference);
         }
+    }
+
+    private boolean mettreAJourStock(String matricule, String medDepotLegal, Integer quantite) {
+        if (medDepotLegal == null || quantite == null) {
+            return true; // Aucun médicament ou quantité, rien à faire
+        }
+
+        Stock stock = StockDao.getStockByVisiteurEtMedicament(matricule, medDepotLegal);
+        if (stock == null || stock.getStock() < quantite) {
+            return false; // Stock insuffisant ou non trouvé
+        }
+
+        stock.setStock(stock.getStock() - quantite);
+        int resultat = StockDao.modifierStock(stock);
+        return resultat > 0;
     }
 
     private void viderChamps() {
@@ -155,9 +205,11 @@ public class JIFVisiteModif extends JInternalFrame implements ActionListener {
         JTmatricule.setText("");
         JTcodeMed.setText("");
         JTcommentaire.setText("");
-        JTmed1.setText("");
+        JCBmed1.removeAllItems();
+        JCBmed1.addItem("Aucun");
+        JCBmed2.removeAllItems();
+        JCBmed2.addItem("Aucun");
         JTquantiteMed1.setText("");
-        JTmed2.setText("");
         JTquantiteMed2.setText("");
     }
 }

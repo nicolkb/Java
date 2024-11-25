@@ -1,8 +1,7 @@
 package gsb.modele.dao;
+
 import gsb.modele.Medicament;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -10,14 +9,21 @@ import java.util.List;
 
 public class MedicamentDao {
 
-    // Recherche un médicament par son dépôt légal
+    /**
+     * Recherche un médicament dans la base de données à partir de son dépôt légal.
+     * 
+     * @param depotLegal Le dépôt légal du médicament à rechercher.
+     * @return Un objet Medicament correspondant à ce dépôt légal, ou null si non trouvé.
+     */
     public static Medicament rechercher(String depotLegal) {
         Medicament unMedicament = null;
+        // Exécution de la requête pour récupérer les informations du médicament
         ResultSet reqSelection = ConnexionMySql.execReqSelection(
             "SELECT * FROM MEDICAMENT WHERE MED_DEPOTLEGAL ='" + depotLegal + "'"
         );
         
         try {
+            // Si un résultat est trouvé, on crée un objet Medicament avec les données récupérées
             if (reqSelection.next()) {
                 unMedicament = new Medicament(
                     reqSelection.getString("MED_DEPOTLEGAL"),
@@ -31,34 +37,49 @@ public class MedicamentDao {
                 );
             }
         } catch (SQLException e) {
+            // Gestion des erreurs de la requête
             System.out.println("Erreur lors de la requête - SELECT * FROM MEDICAMENT WHERE MED_DEPOTLEGAL ='" + depotLegal + "'");
             e.printStackTrace();
         }
         
+        // Fermeture de la connexion à la base de données
         ConnexionMySql.fermerConnexionBd();
         return unMedicament;
     }
     
-    // Retourne une collection de tous les médicaments
+    /**
+     * Retourne une collection de tous les médicaments dans la base de données.
+     * 
+     * @return Une liste de tous les médicaments.
+     */
     public static ArrayList<Medicament> retournerCollectionDesMedicaments() {
         ArrayList<Medicament> collectionDesMedicaments = new ArrayList<>();
+        // Exécution de la requête pour récupérer tous les médicaments
         ResultSet reqSelection = ConnexionMySql.execReqSelection("SELECT MED_DEPOTLEGAL FROM MEDICAMENT");
         
         try {
+            // Parcours des résultats et ajout de chaque médicament à la collection
             while (reqSelection.next()) {
                 String depotLegal = reqSelection.getString(1);
                 collectionDesMedicaments.add(MedicamentDao.rechercher(depotLegal));
             }
         } catch (SQLException e) {
+            // Gestion des erreurs lors de la récupération des médicaments
             e.printStackTrace();
             System.out.println("Erreur dans retournerCollectionDesMedicaments()");
         }
         
+        // Fermeture de la connexion à la base de données
         ConnexionMySql.fermerConnexionBd();
         return collectionDesMedicaments;
     }
 
-    // Crée un nouveau médicament
+    /**
+     * Crée un nouveau médicament dans la base de données.
+     * 
+     * @param unMedicament L'objet Medicament à insérer dans la base.
+     * @return Le nombre de lignes affectées par la requête d'insertion (1 si succès, 0 sinon).
+     */
     public static int creer(Medicament unMedicament) {
         int result = 0;
         String requeteInsertion;
@@ -79,9 +100,10 @@ public class MedicamentDao {
                 famCode + "','" + famLibelle + "')";
 
         try {
-            // Exécution de la requête
+            // Exécution de la requête d'insertion dans la base de données
             result = ConnexionMySql.execReqMaj(requeteInsertion);
         } catch (Exception e) {
+            // Gestion des erreurs d'insertion
             System.out.println("Echec insertion Medicament");
             e.printStackTrace();
         }
@@ -90,10 +112,17 @@ public class MedicamentDao {
         ConnexionMySql.fermerConnexionBd();
         return result;
     }
+
+    /**
+     * Retourne la liste des familles de médicaments distinctes.
+     * 
+     * @return Une liste contenant les familles de médicaments sous forme de chaîne de caractères "FAM_CODE - FAM_LIBELLE".
+     */
     public static List<String> retournerToutesLesFamilles() {
         List<String> familles = new ArrayList<>();
         String sql = "SELECT DISTINCT FAM_CODE, FAM_LIBELLE FROM MEDICAMENT";
 
+        // Exécution de la requête pour récupérer les familles
         ResultSet rs = ConnexionMySql.execReqSelection(sql);
         
         try {
@@ -103,19 +132,28 @@ public class MedicamentDao {
                 familles.add(famCodeLibelle);
             }
         } catch (SQLException e) {
+            // Gestion des erreurs lors de la récupération des familles
             e.printStackTrace();
         } finally {
-            ConnexionMySql.fermerConnexionBd();  // Fermer la connexion après l'exécution
+            // Fermeture de la connexion à la base de données
+            ConnexionMySql.fermerConnexionBd();  
         }
         
         return familles;
     }
+
+    /**
+     * Recherche des médicaments dans la base de données en fonction de leur famille.
+     * 
+     * @param famCode Le code de la famille de médicaments à rechercher.
+     * @return Une liste des médicaments correspondant à cette famille.
+     */
     public static List<Medicament> rechercherParFamille(String famCode) {
         List<Medicament> medicaments = new ArrayList<>();
         String sql = "SELECT MED_DEPOTLEGAL, MED_NOMCOMMERCIAL, MED_COMPOSITION, MED_EFFETS, MED_CONTREINDIC " +
                      "FROM MEDICAMENT WHERE FAM_CODE = '" + famCode + "'";
 
-        // Exécution de la requête via la méthode execReqSelection de ConnexionMySql
+        // Exécution de la requête pour récupérer les médicaments de cette famille
         ResultSet rs = ConnexionMySql.execReqSelection(sql);
         
         try {
@@ -132,26 +170,36 @@ public class MedicamentDao {
                 medicaments.add(medicament);
             }
         } catch (SQLException e) {
+            // Gestion des erreurs lors de la récupération des médicaments
             e.printStackTrace();
         } finally {
-            ConnexionMySql.fermerConnexionBd();  // Fermeture de la connexion après l'exécution
+            // Fermeture de la connexion à la base de données
+            ConnexionMySql.fermerConnexionBd();  
         }
 
         return medicaments;
     }
+
+    /**
+     * Retourne la liste des dépôts légaux de tous les médicaments dans la base de données.
+     * 
+     * @return Une liste de tous les dépôts légaux des médicaments.
+     */
     public static List<String> getAllDepotLegals() {
         List<String> depotLegals = new ArrayList<>();
         try {
             String requete = "SELECT MED_DEPOTLEGAL FROM MEDICAMENT";
             ResultSet resultSet = ConnexionMySql.execReqSelection(requete);
+            
             while (resultSet.next()) {
                 depotLegals.add(resultSet.getString("MED_DEPOTLEGAL"));
             }
+            
             resultSet.close();
         } catch (SQLException e) {
+            // Gestion des erreurs lors de la récupération des dépôts légaux
             e.printStackTrace();
         }
         return depotLegals;
     }
 }
-

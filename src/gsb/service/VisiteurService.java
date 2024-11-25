@@ -16,7 +16,7 @@ public class VisiteurService {
                                          String adresse, String codePostal, String dateEntree, 
                                          String codeUnit, String nomUnit) {
         try {
-            if (matricule == null || matricule.isEmpty()) {
+            if (matricule.length() >= 4 || matricule == null || matricule.isEmpty()) {
                 return "Le matricule est obligatoire.";
             }
             if (nom == null || nom.isEmpty()) {
@@ -37,9 +37,9 @@ public class VisiteurService {
 
             Date dateEntreeFormat;
             try {
-                dateEntreeFormat = new SimpleDateFormat("dd-MM-yyyy").parse(dateEntree);
+                dateEntreeFormat = new SimpleDateFormat("YYYY-MM-DD").parse(dateEntree);
             } catch (ParseException e) {
-                return "La date d'entrée est invalide. Format attendu : jj/mm/aaaa.";
+                return "La date d'entrée est invalide. Format attendu : aaaa/mm/jj.";
             }
 
             // Création de l'objet Visiteur

@@ -120,7 +120,7 @@ public class JIFVisiteListe extends JInternalFrame implements ActionListener {
         }
     }
 
-    private void updateTableData(List<Visite> visites) {
+    private void updateTableData (List<Visite> visites) {
         String[][] data = new String[visites.size()][3];
         for (int i = 0; i < visites.size(); i++) {
             Visite uneVisite = visites.get(i);
