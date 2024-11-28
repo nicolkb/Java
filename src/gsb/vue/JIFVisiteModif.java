@@ -134,54 +134,78 @@ public class JIFVisiteModif extends JInternalFrame implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent evt) {
-        if (evt.getSource() == JBmodifier) {
-            try {
-                String reference = (String) JCBreference.getSelectedItem();
+    	if (evt.getSource() == JBmodifier) {
+    	    try {
+    	        String reference = (String) JCBreference.getSelectedItem();
 
-                if (reference == null || reference.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Veuillez sélectionner une référence de visite.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
+    	        if (reference == null || reference.isEmpty()) {
+    	            JOptionPane.showMessageDialog(this, "Veuillez sélectionner une référence de visite.", "Erreur", JOptionPane.ERROR_MESSAGE);
+    	            return;
+    	        }
 
-                String commentaire = JTcommentaire.getText();
-                String medOffert1 = "Aucun".equals(JCBmed1.getSelectedItem()) ? null : (String) JCBmed1.getSelectedItem();
-                String medOffert2 = "Aucun".equals(JCBmed2.getSelectedItem()) ? null : (String) JCBmed2.getSelectedItem();
+    	        String commentaire = JTcommentaire.getText();
+    	        String medOffert1 = "Aucun".equals(JCBmed1.getSelectedItem()) ? null : (String) JCBmed1.getSelectedItem();
+    	        String medOffert2 = "Aucun".equals(JCBmed2.getSelectedItem()) ? null : (String) JCBmed2.getSelectedItem();
 
-                Integer quantiteMed1 = JTquantiteMed1.getText().isEmpty() ? 0 : Integer.parseInt(JTquantiteMed1.getText());
-                Integer quantiteMed2 = JTquantiteMed2.getText().isEmpty() ? 0 : Integer.parseInt(JTquantiteMed2.getText());
+    	        Integer quantiteMed1 = JTquantiteMed1.getText().isEmpty() ? 0 : Integer.parseInt(JTquantiteMed1.getText());
+    	        Integer quantiteMed2 = JTquantiteMed2.getText().isEmpty() ? 0 : Integer.parseInt(JTquantiteMed2.getText());
 
-                if (commentaire != null && !commentaire.isEmpty()) {
-                    VisiteDao.mettreAJourCommentaire(reference, commentaire);
-                }
+    	        boolean modificationEffectuee = false;
 
-                if (medOffert1 != null && quantiteMed1 > 0) {
-                    if (!mettreAJourStock(JTmatricule.getText(), medOffert1, quantiteMed1)) {
-                        JOptionPane.showMessageDialog(this, "Stock insuffisant pour le médicament 1.", "Erreur de stock", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    VisiteDao.mettreAJourMedOffert1(reference, medOffert1, quantiteMed1);
-                }
+    	        // Mise à jour du commentaire
+    	        if (commentaire != null && !commentaire.isEmpty()) {
+    	            VisiteDao.mettreAJourCommentaire(reference, commentaire);
+    	            modificationEffectuee = true;
+    	        }
 
-                if (medOffert2 != null && quantiteMed2 > 0) {
-                    if (!mettreAJourStock(JTmatricule.getText(), medOffert2, quantiteMed2)) {
-                        JOptionPane.showMessageDialog(this, "Stock insuffisant pour le médicament 2.", "Erreur de stock", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    VisiteDao.mettreAJourMedOffert2(reference, medOffert2, quantiteMed2);
-                }
+    	        // Vérification des médicaments et des quantités
+    	        if (commentaire != null && !commentaire.isEmpty()) { // Les modifications des médicaments nécessitent un commentaire
+    	            if (medOffert1 != null) {
+    	                if (quantiteMed1 <= 0) {
+    	                    JOptionPane.showMessageDialog(this, "Veuillez entrer une quantité valide pour le médicament 1.", "Erreur", JOptionPane.ERROR_MESSAGE);
+    	                    return;
+    	                }
+    	                if (!mettreAJourStock(JTmatricule.getText(), medOffert1, quantiteMed1)) {
+    	                    JOptionPane.showMessageDialog(this, "Stock insuffisant pour le médicament 1.", "Erreur de stock", JOptionPane.ERROR_MESSAGE);
+    	                    return;
+    	                }
+    	                VisiteDao.mettreAJourMedOffert1(reference, medOffert1, quantiteMed1);
+    	                modificationEffectuee = true;
+    	            }
 
-                JOptionPane.showMessageDialog(this, "Visite mise à jour avec succès.");
-                viderChamps();
+    	            if (medOffert2 != null) {
+    	                if (quantiteMed2 <= 0) {
+    	                    JOptionPane.showMessageDialog(this, "Veuillez entrer une quantité valide pour le médicament 2.", "Erreur", JOptionPane.ERROR_MESSAGE);
+    	                    return;
+    	                }
+    	                if (!mettreAJourStock(JTmatricule.getText(), medOffert2, quantiteMed2)) {
+    	                    JOptionPane.showMessageDialog(this, "Stock insuffisant pour le médicament 2.", "Erreur de stock", JOptionPane.ERROR_MESSAGE);
+    	                    return;
+    	                }
+    	                VisiteDao.mettreAJourMedOffert2(reference, medOffert2, quantiteMed2);
+    	                modificationEffectuee = true;
+    	            }
+    	        }
 
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Veuillez entrer un nombre valide pour les quantités.", "Erreur", JOptionPane.ERROR_MESSAGE);
-            }
-        } else if (evt.getSource() == JBannuler) {
-            viderChamps();
-        } else if (evt.getSource() == JCBreference) {
-            String reference = (String) JCBreference.getSelectedItem();
-            afficherDetailsVisite(reference);
-        }
+    	        // Résultat de la modification
+    	        if (modificationEffectuee) {
+    	            JOptionPane.showMessageDialog(this, "Visite mise à jour avec succès.");
+    	        } else {
+    	            JOptionPane.showMessageDialog(this, "Aucune modification effectuée car le commentaire est vide.", "Avertissement", JOptionPane.WARNING_MESSAGE);
+    	        }
+
+    	        viderChamps();
+
+    	    } catch (NumberFormatException e) {
+    	        JOptionPane.showMessageDialog(this, "Veuillez entrer un nombre valide pour les quantités.", "Erreur", JOptionPane.ERROR_MESSAGE);
+    	    }
+    	} else if (evt.getSource() == JBannuler) {
+    	    viderChamps();
+    	} else if (evt.getSource() == JCBreference) {
+    	    String reference = (String) JCBreference.getSelectedItem();
+    	    afficherDetailsVisite(reference);
+    	}
+
     }
 
     private boolean mettreAJourStock(String matricule, String medDepotLegal, Integer quantite) {

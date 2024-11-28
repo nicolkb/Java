@@ -131,7 +131,7 @@ public class StockDao {
     public static ArrayList<Stock> getStockByVisiteur(String codeVisiteur) {
         ArrayList<Stock> listeStock = new ArrayList<>();
         // Requête pour récupérer tous les stocks d'un visiteur
-        String requete = "SELECT STOCK_ID, MED_DEPOTLEGAL, MATRICULE, QUANTITE FROM Stock WHERE matricule = '" + codeVisiteur + "'";
+        String requete = "SELECT STOCK_ID, MED_DEPOTLEGAL, MATRICULE, QUANTITE FROM STOCK WHERE MATRICULE = '" + codeVisiteur + "'";
 
         try {
             ResultSet resultat = ConnexionMySql.execReqSelection(requete);
