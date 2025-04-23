@@ -46,6 +46,12 @@ public class Medicament {
      * Libellé de la famille du médicament.
      */
     private String famLibelle;
+    
+    private String denominationCommun;
+    private String type;
+    private String dosage;
+    private String quantite;
+
 
     // Constructeurs
 
@@ -90,6 +96,21 @@ public class Medicament {
         this.medEffets = medEffets;
         this.medContreIndic = medContreIndic;
     }
+    public Medicament(String medDepotLegal, String medNomCommercial, String medComposition, String medEffets, 
+            String medContreIndic, float medPrixEchantillon, String famCode, String famLibelle,String denominationCommun,String type,String dosage,String quantite) {
+		this.medDepotLegal = medDepotLegal;
+		this.medNomCommercial = medNomCommercial;
+		this.medComposition = medComposition;
+		this.medEffets = medEffets;
+		this.medContreIndic = medContreIndic;
+		this.medPrixEchantillon = medPrixEchantillon;
+		this.famCode = famCode;
+		this.famLibelle = famLibelle;
+		this.denominationCommun = denominationCommun;
+	    this.type = type;
+	    this.dosage = dosage;
+	    this.quantite = quantite;
+		}
 
     // Getters et Setters
 
@@ -236,4 +257,17 @@ public class Medicament {
     public void setFamLibelle(String famLibelle) {
         this.famLibelle = famLibelle;
     }
-}
+    public String getDenominationCommun() { return denominationCommun; }
+    public void setDenominationCommun(String denominationCommun) { this.denominationCommun = denominationCommun; }
+
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+
+    public String getDosage() { return dosage; }
+    public void setDosage(String dosage) { this.dosage = dosage; }
+
+    public String getQuantite() { return quantite; }
+    public void setQuantite(String quantite) { this.quantite = quantite; }
+} 
+
+

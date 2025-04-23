@@ -93,22 +93,26 @@ public class MedicamentDao {
         float prixEchantillon = unMedicament.getMedPrixEchantillon();
         String famCode = unMedicament.getFamCode();
         String famLibelle = unMedicament.getFamLibelle();
+        String denomination = unMedicament.getDenominationCommun();
+        String type = unMedicament.getType();
+        String dosage = unMedicament.getDosage();
+        String quantite = unMedicament.getQuantite();
 
         // Création de la requête d'insertion
-        requeteInsertion = "INSERT INTO MEDICAMENT VALUES('" + depotLegal + "','" + nomCommercial + "','" +
-                composition + "','" + effets + "','" + contreIndications + "'," + prixEchantillon + ",'" +
-                famCode + "','" + famLibelle + "')";
+        requeteInsertion = "INSERT INTO MEDICAMENT (MED_DEPOTLEGAL, MED_NOMCOMMERCIAL, MED_COMPOSITION, MED_EFFETS, " +
+            "MED_CONTREINDIC, MED_PRIXECHANTILLON, FAM_CODE, FAM_LIBELLE, denominationCommun, type, dosage, quantité) VALUES('" +
+            depotLegal + "','" + nomCommercial + "','" + composition + "','" + effets + "','" +
+            contreIndications + "'," + prixEchantillon + ",'" + famCode + "','" + famLibelle + "','" +
+            denomination + "','" + type + "','" + dosage + "','" + quantite + "')";
 
         try {
-            // Exécution de la requête d'insertion dans la base de données
+            // Exécution de la requête
             result = ConnexionMySql.execReqMaj(requeteInsertion);
         } catch (Exception e) {
-            // Gestion des erreurs d'insertion
-            System.out.println("Echec insertion Medicament");
+            System.out.println("Échec insertion Medicament");
             e.printStackTrace();
         }
 
-        // Fermeture de la connexion à la base de données
         ConnexionMySql.fermerConnexionBd();
         return result;
     }
@@ -201,5 +205,51 @@ public class MedicamentDao {
             e.printStackTrace();
         }
         return depotLegals;
+    }
+    public static List<String> retournerToutesLesDenominations() {
+        List<String> denominations = new ArrayList<>();
+        ResultSet reqSelection = ConnexionMySql.execReqSelection("SELECT DISTINCT denominationCommun FROM MEDICAMENT WHERE denominationCommun IS NOT NULL");
+
+        try {
+            while (reqSelection.next()) {
+                denominations.add(reqSelection.getString("denominationCommun"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la récupération des dénominations : " + e.getMessage());
+        }
+
+        ConnexionMySql.fermerConnexionBd();
+        return denominations;
+    }
+    public static List<Medicament> rechercherParDenomination(String denomination) {
+        List<Medicament> liste = new ArrayList<>();
+        ResultSet reqSelection = ConnexionMySql.execReqSelection(
+            "SELECT * FROM MEDICAMENT WHERE denominationCommun = '" + denomination + "'"
+        );
+
+        try {
+            while (reqSelection.next()) {
+                Medicament m = new Medicament(
+                    reqSelection.getString("MED_DEPOTLEGAL"),
+                    reqSelection.getString("MED_NOMCOMMERCIAL"),
+                    reqSelection.getString("MED_COMPOSITION"),
+                    reqSelection.getString("MED_EFFETS"),
+                    reqSelection.getString("MED_CONTREINDIC"),
+                    reqSelection.getFloat("MED_PRIXECHANTILLON"),
+                    reqSelection.getString("FAM_CODE"),
+                    reqSelection.getString("FAM_LIBELLE"),
+                    reqSelection.getString("denominationCommun"),
+                    reqSelection.getString("type"),
+                    reqSelection.getString("dosage"),
+                    reqSelection.getString("quantité")
+                );
+                liste.add(m);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la récupération des médicaments par dénomination : " + e.getMessage());
+        }
+
+        ConnexionMySql.fermerConnexionBd();
+        return liste;
     }
 }
